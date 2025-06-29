@@ -1,45 +1,44 @@
 # 🔧 Predictive Maintenance using Machine Learning
 
-This project is built as part of the **ML Intern application for Xempla**.  
-It demonstrates a complete machine learning pipeline for predicting equipment failure using structured sensor data.
+This is a submission for the **ML Intern role at Xempla**.  
+The project predicts whether a machine is likely to fail based on real-time sensor data, using a complete ML pipeline built in Python.
 
 ---
 
 ## 📌 Objective
 
-To build a system that predicts whether a machine is likely to fail based on key sensor readings like temperature, pressure, vibration, humidity, and RPM.
+To develop a machine learning model that can predict maintenance issues in advance using structured data like temperature, pressure, vibration, humidity, and RPM.
 
 ---
 
 ## 🧠 Tech Stack
 
 - Python 🐍
-- Pandas & NumPy (Data Handling)
-- Matplotlib & Seaborn (EDA/Visualization)
-- Scikit-learn (Modeling)
+- pandas & numpy (Data handling)
+- scikit-learn (Preprocessing, modeling, tuning)
+- matplotlib & seaborn (Exploratory Data Analysis)
 
 ---
 
-## 📁 Dataset
+## 🗂️ Dataset
 
-The dataset contains 10 samples of simulated machine sensor readings with binary labels for failure.
+A realistic synthetic dataset with 100 samples:
+- 50 normal (failure = 0)
+- 50 failure (failure = 1)
 
-| Feature       | Description                     |
-|---------------|---------------------------------|
-| temperature   | Internal temperature (°C)       |
-| pressure      | Machine pressure (bar)          |
-| vibration     | Vibration level                 |
-| humidity      | Ambient humidity (%)            |
-| rpm           | Rotations per minute            |
-| failure       | Target (1 = failure, 0 = normal)|
+Each row contains:
+- `temperature`, `pressure`, `vibration`, `humidity`, `rpm`, and `failure`
 
 ---
 
 ## ✅ Features Implemented
 
-- Clean feature engineering and scaling
-- Logistic Regression and Random Forest models
-- Evaluation using Accuracy, F1 Score, Confusion Matrix
-- Custom prediction function:  
-  ```python
-  predict_failure([temperature, pressure, vibration, humidity, rpm])
+- Preprocessing using `StandardScaler`
+- Train/test split using `train_test_split`
+- Models: Logistic Regression & Random Forest
+- Random Forest tuning using `GridSearchCV`
+- Evaluation using accuracy, F1 score, confusion matrix, and report
+- Live prediction function:
+
+```python
+predict_failure([temperature, pressure, vibration, humidity, rpm])

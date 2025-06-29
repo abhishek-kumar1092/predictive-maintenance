@@ -1,27 +1,26 @@
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score, confusion_matrix, classification_report
 
-# Step 1: Load Dataset
-df = pd.read_csv("predictive_maintenance.csv")
+#loading the dataset
+df = pd.read_csv("predictive_maintenance_balanced.csv")
 
-# Step 2: Basic Info
 print(df.head())
 print(df.info())
 print(df['failure'].value_counts())
 
-# Step 3: Feature/Target Split
+#Feature/Target Split
 X = df.drop('failure', axis=1)
 y = df['failure']
 
-# Step 4: Feature Scaling
+#Feature Scaling
 scaler = StandardScaler()
 X_scaled = scaler.fit_transform(X)
 
-# Step 5: Train/Test Split
+#Train/Test Split
 X_train, X_test, y_train, y_test = train_test_split(
     X_scaled, y, test_size=0.2, random_state=42
 )
@@ -30,16 +29,24 @@ print("X_train shape:", X_train.shape)
 print("X_test shape:", X_test.shape)
 print("y_train distribution:\n", y_train.value_counts())
 
-# Step 6: Train Models
+#Training Logistic Regression
 lr_model = LogisticRegression()
 lr_model.fit(X_train, y_train)
 lr_preds = lr_model.predict(X_test)
 
-rf_model = RandomForestClassifier()
-rf_model.fit(X_train, y_train)
-rf_preds = rf_model.predict(X_test)
+#Tuning Random Forest with GridSearchCV
+param_grid = {
+    'n_estimators': [50, 100, 200],
+    'max_depth': [None, 5, 10],
+    'min_samples_split': [2, 5]
+}
 
-# Step 7: Evaluation Function
+grid_search = GridSearchCV(RandomForestClassifier(), param_grid, cv=5, scoring='f1', n_jobs=-1)
+grid_search.fit(X_train, y_train)
+best_rf_model = grid_search.best_estimator_
+best_rf_preds = best_rf_model.predict(X_test)
+
+#Evaluation Function/Metrics
 def evaluate_model(name, y_true, y_pred):
     print(f"\n📊 Evaluation: {name}")
     print("Accuracy:", accuracy_score(y_true, y_pred))
@@ -47,23 +54,24 @@ def evaluate_model(name, y_true, y_pred):
     print("Confusion Matrix:\n", confusion_matrix(y_true, y_pred))
     print("Classification Report:\n", classification_report(y_true, y_pred))
 
-# Step 8: Evaluate Both Models
+#Evaluate Models
 evaluate_model("Logistic Regression", y_test, lr_preds)
-evaluate_model("Random Forest", y_test, rf_preds)
+evaluate_model("Random Forest (Tuned)", y_test, best_rf_preds)
 
+#Real-time Prediction Function
 def predict_failure(input_features):
     """
-    Predict failure using Random Forest based on input features:
+    Predict failure using the best tuned Random Forest model.
     input_features = [temperature, pressure, vibration, humidity, rpm]
     """
     input_scaled = scaler.transform([input_features])
-    prediction = rf_model.predict(input_scaled)[0]
+    prediction = best_rf_model.predict(input_scaled)[0]
 
     if prediction == 1:
         print("\n🔧 Prediction: ❌ Failure is likely. Take preventive action!")
     else:
         print("\n🔧 Prediction: ✅ System is operating normally.")
 
-# 🔍 Example usage:
-example_input = [85.0, 6.2, 0.7, 48, 1320]  # high temp, vibration, low RPM
+#Example usage:
+example_input = [85.0, 6.2, 0.7, 48, 1320]  # High temp, pressure, vibration
 predict_failure(example_input)
